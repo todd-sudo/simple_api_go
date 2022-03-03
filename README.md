@@ -9,6 +9,6 @@
 
 ### Запуск:
 
-    ``` bash
-        go run cmd/web/main.go
+    ```
+    go run cmd/web/main.go
     ```

@@ -9,6 +9,6 @@
 
 ### Запуск:
 
-    ```
-    go run cmd/web/main.go
-    ```
+    <code>
+        go run cmd/web/main.go
+    </code>

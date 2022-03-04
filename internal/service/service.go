@@ -10,10 +10,10 @@ import (
 )
 
 type Auth interface {
-	VerifyCredential(ctx context.Context, email string, password string) interface{}
-	CreateUser(ctx context.Context, user dto.RegisterDTO) model.User
-	FindByEmail(ctx context.Context, email string) model.User
-	IsDuplicateEmail(ctx context.Context, email string) bool
+	VerifyCredential(ctx context.Context, email string, password string) (*model.User, error)
+	CreateUser(ctx context.Context, user dto.RegisterDTO) (*model.User, error)
+	FindByEmail(ctx context.Context, email string) (*model.User, error)
+	IsDuplicateEmail(ctx context.Context, email string) (bool, error)
 }
 
 type JWT interface {
@@ -22,17 +22,17 @@ type JWT interface {
 }
 
 type Item interface {
-	Insert(ctx context.Context, b dto.ItemCreateDTO) model.Item
-	Update(ctx context.Context, b dto.ItemUpdateDTO) model.Item
-	Delete(ctx context.Context, b model.Item)
-	All(ctx context.Context) []model.Item
-	FindByID(ctx context.Context, itemID uint64) model.Item
-	IsAllowedToEdit(ctx context.Context, userID string, itemID uint64) bool
+	Insert(ctx context.Context, b dto.ItemCreateDTO) (*model.Item, error)
+	Update(ctx context.Context, b dto.ItemUpdateDTO) (*model.Item, error)
+	Delete(ctx context.Context, b model.Item) error
+	All(ctx context.Context) ([]*model.Item, error)
+	FindByID(ctx context.Context, itemID uint64) (*model.Item, error)
+	IsAllowedToEdit(ctx context.Context, userID string, itemID uint64) (bool, error)
 }
 
 type User interface {
-	Update(ctx context.Context, user dto.UserUpdateDTO) model.User
-	Profile(ctx context.Context, userID string) model.User
+	Update(ctx context.Context, user dto.UserUpdateDTO) (*model.User, error)
+	Profile(ctx context.Context, userID string) (*model.User, error)
 }
 
 type Service struct {

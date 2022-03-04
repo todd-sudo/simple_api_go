@@ -11,8 +11,8 @@ import (
 )
 
 type UserService interface {
-	Update(ctx context.Context, user dto.UserUpdateDTO) model.User
-	Profile(ctx context.Context, userID string) model.User
+	Update(ctx context.Context, user dto.UserUpdateDTO) (*model.User, error)
+	Profile(ctx context.Context, userID string) (*model.User, error)
 }
 
 type userService struct {
@@ -28,17 +28,25 @@ func NewUserService(ctx context.Context, userRepo repository.UserRepository) Use
 }
 
 // Обновить пользователя
-func (service *userService) Update(ctx context.Context, user dto.UserUpdateDTO) model.User {
+func (service *userService) Update(ctx context.Context, user dto.UserUpdateDTO) (*model.User, error) {
 	userToUpdate := model.User{}
 	err := smapping.FillStruct(&userToUpdate, smapping.MapFields(&user))
 	if err != nil {
 		log.Errorf("Failed map %v:", err)
 	}
-	updatedUser := service.userRepository.UpdateUser(ctx, userToUpdate)
-	return updatedUser
+	updatedUser, err := service.userRepository.UpdateUser(ctx, userToUpdate)
+	if err != nil {
+		log.Errorf("update user error: %v", err)
+	}
+	return updatedUser, nil
 }
 
 // Профиль пользователя
-func (service *userService) Profile(ctx context.Context, userID string) model.User {
-	return service.userRepository.ProfileUser(ctx, userID)
+func (service *userService) Profile(ctx context.Context, userID string) (*model.User, error) {
+	userProfile, err := service.userRepository.ProfileUser(ctx, userID)
+	if err != nil {
+		log.Errorf("profile user error: %v", err)
+		return nil, err
+	}
+	return userProfile, nil
 }

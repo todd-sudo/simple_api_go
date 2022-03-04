@@ -13,10 +13,10 @@ import (
 
 //AuthService is a contract about something that this service can do
 type AuthService interface {
-	VerifyCredential(ctx context.Context, email, password string) interface{}
-	CreateUser(ctx context.Context, user dto.RegisterDTO) model.User
-	FindByEmail(ctx context.Context, email string) model.User
-	IsDuplicateEmail(ctx context.Context, email string) bool
+	VerifyCredential(ctx context.Context, email, password string) (*model.User, error)
+	CreateUser(ctx context.Context, user dto.RegisterDTO) (*model.User, error)
+	FindByEmail(ctx context.Context, email string) (*model.User, error)
+	IsDuplicateEmail(ctx context.Context, email string) (bool, error)
 }
 
 type authService struct {
@@ -32,35 +32,45 @@ func NewAuthService(ctx context.Context, userRep repository.UserRepository) Auth
 	}
 }
 
-func (service *authService) VerifyCredential(ctx context.Context, email, password string) interface{} {
-	res := service.userRepository.VerifyCredential(ctx, email)
-	if v, ok := res.(model.User); ok {
-		comparedPassword := comparePassword(v.Password, []byte(password))
-		if v.Email == email && comparedPassword {
-			return res
-		}
-		return false
+func (service *authService) VerifyCredential(ctx context.Context, email, password string) (*model.User, error) {
+	user, err := service.userRepository.VerifyCredential(ctx, email)
+
+	comparedPassword := comparePassword(user.Password, []byte(password))
+	if user.Email == email && comparedPassword {
+		return user, nil
 	}
-	return false
+	return nil, err
 }
 
-func (service *authService) CreateUser(ctx context.Context, user dto.RegisterDTO) model.User {
+func (service *authService) CreateUser(ctx context.Context, user dto.RegisterDTO) (*model.User, error) {
 	userToCreate := model.User{}
 	err := smapping.FillStruct(&userToCreate, smapping.MapFields(&user))
 	if err != nil {
 		log.Errorf("Failed map %v", err)
 	}
-	res := service.userRepository.InsertUser(ctx, userToCreate)
-	return res
+	userModel, errU := service.userRepository.InsertUser(ctx, userToCreate)
+	if errU != nil {
+		log.Errorf("create user error %v", errU)
+		return nil, errU
+	}
+	return userModel, nil
 }
 
-func (service *authService) FindByEmail(ctx context.Context, email string) model.User {
-	return service.userRepository.FindByEmail(ctx, email)
+func (service *authService) FindByEmail(ctx context.Context, email string) (*model.User, error) {
+	user, err := service.userRepository.FindByEmail(ctx, email)
+	if err != nil {
+		log.Errorf("find by email user error %v", err)
+		return nil, err
+	}
+	return user, nil
 }
 
-func (service *authService) IsDuplicateEmail(ctx context.Context, email string) bool {
-	res := service.userRepository.IsDuplicateEmail(ctx, email)
-	return !(res.Error == nil)
+func (service *authService) IsDuplicateEmail(ctx context.Context, email string) (bool, error) {
+	res, err := service.userRepository.IsDuplicateEmail(ctx, email)
+	if err != nil {
+		return false, err
+	}
+	return res, nil
 }
 
 func comparePassword(hashedPwd string, plainPassword []byte) bool {

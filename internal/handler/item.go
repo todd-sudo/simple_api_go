@@ -14,105 +14,105 @@ import (
 )
 
 // Получениек всех item
-func (c *Handler) AllItem(context *gin.Context) {
-	var items []model.Item = c.service.Item.All()
+func (c *Handler) AllItem(ctx *gin.Context) {
+	var items []model.Item = c.service.Item.All(ctx)
 	res := helper.BuildResponse(true, "OK", items)
-	context.JSON(http.StatusOK, res)
+	ctx.JSON(http.StatusOK, res)
 }
 
 // Поиск Item по ID
-func (c *Handler) FindByIDItem(context *gin.Context) {
-	id, err := strconv.ParseUint(context.Param("id"), 0, 0)
+func (c *Handler) FindByIDItem(ctx *gin.Context) {
+	id, err := strconv.ParseUint(ctx.Param("id"), 0, 0)
 	if err != nil {
 		res := helper.BuildErrorResponse("No param id was found", err.Error(), helper.EmptyObj{})
-		context.AbortWithStatusJSON(http.StatusBadRequest, res)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
 		return
 	}
 
-	var item model.Item = c.service.Item.FindByID(id)
+	var item model.Item = c.service.Item.FindByID(ctx, id)
 	if (item == model.Item{}) {
 		res := helper.BuildErrorResponse("Data not found", "No data with given id", helper.EmptyObj{})
-		context.JSON(http.StatusNotFound, res)
+		ctx.JSON(http.StatusNotFound, res)
 	} else {
 		res := helper.BuildResponse(true, "OK", item)
-		context.JSON(http.StatusOK, res)
+		ctx.JSON(http.StatusOK, res)
 	}
 }
 
 // Добавление Item
-func (c *Handler) InsertItem(context *gin.Context) {
+func (c *Handler) InsertItem(ctx *gin.Context) {
 	var itemCreateDTO dto.ItemCreateDTO
-	errDTO := context.ShouldBind(&itemCreateDTO)
+	errDTO := ctx.ShouldBind(&itemCreateDTO)
 	if errDTO != nil {
 		res := helper.BuildErrorResponse("Failed to process request", errDTO.Error(), helper.EmptyObj{})
-		context.JSON(http.StatusBadRequest, res)
+		ctx.JSON(http.StatusBadRequest, res)
 	} else {
-		authHeader := context.GetHeader("Authorization")
+		authHeader := ctx.GetHeader("Authorization")
 		userID := c.getUserIDByToken(authHeader)
 		convertedUserID, err := strconv.ParseUint(userID, 10, 64)
 		if err == nil {
 			itemCreateDTO.UserID = convertedUserID
 		}
-		result := c.service.Item.Insert(itemCreateDTO)
+		result := c.service.Item.Insert(ctx, itemCreateDTO)
 		response := helper.BuildResponse(true, "OK", result)
-		context.JSON(http.StatusCreated, response)
+		ctx.JSON(http.StatusCreated, response)
 	}
 }
 
 // Обновление Item
-func (c *Handler) UpdateItem(context *gin.Context) {
+func (c *Handler) UpdateItem(ctx *gin.Context) {
 	var itemUpdateDTO dto.ItemUpdateDTO
-	errDTO := context.ShouldBind(&itemUpdateDTO)
+	errDTO := ctx.ShouldBind(&itemUpdateDTO)
 	if errDTO != nil {
 		res := helper.BuildErrorResponse("Failed to process request", errDTO.Error(), helper.EmptyObj{})
-		context.JSON(http.StatusBadRequest, res)
+		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
 
-	authHeader := context.GetHeader("Authorization")
+	authHeader := ctx.GetHeader("Authorization")
 	token, errToken := c.service.JWT.ValidateToken(authHeader)
 	if errToken != nil {
 		log.Error(errToken.Error())
 	}
 	claims := token.Claims.(jwt.MapClaims)
 	userID := fmt.Sprintf("%v", claims["user_id"])
-	if c.service.Item.IsAllowedToEdit(userID, itemUpdateDTO.ID) {
+	if c.service.Item.IsAllowedToEdit(ctx, userID, itemUpdateDTO.ID) {
 		id, errID := strconv.ParseUint(userID, 10, 64)
 		if errID == nil {
 			itemUpdateDTO.UserID = id
 		}
-		result := c.service.Item.Update(itemUpdateDTO)
+		result := c.service.Item.Update(ctx, itemUpdateDTO)
 		response := helper.BuildResponse(true, "OK", result)
-		context.JSON(http.StatusOK, response)
+		ctx.JSON(http.StatusOK, response)
 	} else {
 		response := helper.BuildErrorResponse("You dont have permission", "You are not the owner", helper.EmptyObj{})
-		context.JSON(http.StatusForbidden, response)
+		ctx.JSON(http.StatusForbidden, response)
 	}
 }
 
 // Удаление Item
-func (c *Handler) DeleteItem(context *gin.Context) {
+func (c *Handler) DeleteItem(ctx *gin.Context) {
 	var item model.Item
-	id, err := strconv.ParseUint(context.Param("id"), 0, 0)
+	id, err := strconv.ParseUint(ctx.Param("id"), 0, 0)
 	if err != nil {
 		response := helper.BuildErrorResponse("Failed tou get id", "No param id were found", helper.EmptyObj{})
-		context.JSON(http.StatusBadRequest, response)
+		ctx.JSON(http.StatusBadRequest, response)
 	}
 	item.ID = id
-	authHeader := context.GetHeader("Authorization")
+	authHeader := ctx.GetHeader("Authorization")
 	token, errToken := c.service.JWT.ValidateToken(authHeader)
 	if errToken != nil {
 		panic(errToken.Error())
 	}
 	claims := token.Claims.(jwt.MapClaims)
 	userID := fmt.Sprintf("%v", claims["user_id"])
-	if c.service.Item.IsAllowedToEdit(userID, item.ID) {
-		c.service.Item.Delete(item)
+	if c.service.Item.IsAllowedToEdit(ctx, userID, item.ID) {
+		c.service.Item.Delete(ctx, item)
 		res := helper.BuildResponse(true, "Deleted", helper.EmptyObj{})
-		context.JSON(http.StatusOK, res)
+		ctx.JSON(http.StatusOK, res)
 	} else {
 		response := helper.BuildErrorResponse("You dont have permission", "You are not the owner", helper.EmptyObj{})
-		context.JSON(http.StatusForbidden, response)
+		ctx.JSON(http.StatusForbidden, response)
 	}
 }
 

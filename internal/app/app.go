@@ -28,8 +28,10 @@ func Run() {
 
 	log.Info("Connect to database successfully!")
 
-	repos := repository.NewRepository(db)
-	services := service.NewService(*repos)
+	ctx := context.Background()
+
+	repos := repository.NewRepository(ctx, db)
+	services := service.NewService(ctx, *repos)
 	handlers := handler.NewHandler(services)
 
 	srv := server.NewServer("8000", handlers.InitRoutes())

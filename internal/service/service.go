@@ -1,6 +1,8 @@
 package service
 
 import (
+	"context"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/todd-sudo/todo/internal/dto"
 	"github.com/todd-sudo/todo/internal/model"
@@ -8,10 +10,10 @@ import (
 )
 
 type Auth interface {
-	VerifyCredential(email string, password string) interface{}
-	CreateUser(user dto.RegisterDTO) model.User
-	FindByEmail(email string) model.User
-	IsDuplicateEmail(email string) bool
+	VerifyCredential(ctx context.Context, email string, password string) interface{}
+	CreateUser(ctx context.Context, user dto.RegisterDTO) model.User
+	FindByEmail(ctx context.Context, email string) model.User
+	IsDuplicateEmail(ctx context.Context, email string) bool
 }
 
 type JWT interface {
@@ -20,17 +22,17 @@ type JWT interface {
 }
 
 type Item interface {
-	Insert(b dto.ItemCreateDTO) model.Item
-	Update(b dto.ItemUpdateDTO) model.Item
-	Delete(b model.Item)
-	All() []model.Item
-	FindByID(itemID uint64) model.Item
-	IsAllowedToEdit(userID string, itemID uint64) bool
+	Insert(ctx context.Context, b dto.ItemCreateDTO) model.Item
+	Update(ctx context.Context, b dto.ItemUpdateDTO) model.Item
+	Delete(ctx context.Context, b model.Item)
+	All(ctx context.Context) []model.Item
+	FindByID(ctx context.Context, itemID uint64) model.Item
+	IsAllowedToEdit(ctx context.Context, userID string, itemID uint64) bool
 }
 
 type User interface {
-	Update(user dto.UserUpdateDTO) model.User
-	Profile(userID string) model.User
+	Update(ctx context.Context, user dto.UserUpdateDTO) model.User
+	Profile(ctx context.Context, userID string) model.User
 }
 
 type Service struct {
@@ -40,11 +42,11 @@ type Service struct {
 	User
 }
 
-func NewService(r repository.Repository) *Service {
+func NewService(ctx context.Context, r repository.Repository) *Service {
 	return &Service{
-		Auth: NewAuthService(r.User),
+		Auth: NewAuthService(ctx, r.User),
 		JWT:  NewJWTService(),
-		Item: NewItemService(r.Item),
-		User: NewUserService(r.User),
+		Item: NewItemService(ctx, r.Item),
+		User: NewUserService(ctx, r.User),
 	}
 }

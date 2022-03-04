@@ -20,7 +20,7 @@ func (c *Handler) Login(ctx *gin.Context) {
 		return
 	}
 
-	authResult := c.service.Auth.VerifyCredential(loginDTO.Email, loginDTO.Password)
+	authResult := c.service.Auth.VerifyCredential(ctx, loginDTO.Email, loginDTO.Password)
 	if v, ok := authResult.(model.User); ok {
 		generatedToken := c.service.JWT.GenerateToken(strconv.FormatUint(v.ID, 10))
 		v.Token = generatedToken
@@ -42,11 +42,11 @@ func (c *Handler) Register(ctx *gin.Context) {
 		return
 	}
 
-	if !c.service.Auth.IsDuplicateEmail(registerDTO.Email) {
+	if !c.service.Auth.IsDuplicateEmail(ctx, registerDTO.Email) {
 		response := helper.BuildErrorResponse("Failed to process request", "Duplicate email", helper.EmptyObj{})
 		ctx.JSON(http.StatusConflict, response)
 	} else {
-		createdUser := c.service.Auth.CreateUser(registerDTO)
+		createdUser := c.service.Auth.CreateUser(ctx, registerDTO)
 		token := c.service.JWT.GenerateToken(strconv.FormatUint(createdUser.ID, 10))
 		createdUser.Token = token
 		response := helper.BuildResponse(true, "OK!", createdUser)

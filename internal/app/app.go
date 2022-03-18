@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/todd-sudo/todo/internal/handler"
-	"github.com/todd-sudo/todo/internal/model"
 	"github.com/todd-sudo/todo/internal/repository"
 	"github.com/todd-sudo/todo/pkg/server"
 
@@ -24,8 +23,8 @@ func Run() {
 		log.Error(err)
 	}
 
-	db.AutoMigrate(&model.Item{}, &model.User{})
-
+	// db.AutoMigrate(&model.Item{}, &model.User{})
+	// log.Info("Migrate Successfully")
 	log.Info("Connect to database successfully!")
 
 	ctx := context.Background()

@@ -44,7 +44,8 @@ func (c *Handler) Register(ctx *gin.Context) {
 	}
 
 	statusEmail, err := c.service.Auth.IsDuplicateEmail(ctx, registerDTO.Email)
-	if err != nil || !statusEmail {
+	log.Info(statusEmail)
+	if err == nil || statusEmail {
 		response := helper.BuildErrorResponse("Failed to process request", "Duplicate email", helper.EmptyObj{})
 		ctx.JSON(http.StatusConflict, response)
 	} else {

@@ -76,13 +76,13 @@ func (db *userConnection) VerifyCredential(ctx context.Context, email string) (*
 
 // Проверка на наличие одинаковых email
 func (db *userConnection) IsDuplicateEmail(ctx context.Context, email string) (bool, error) {
-	var user model.User
+	var user *model.User
 	res := db.connection.WithContext(ctx).Where("email = ?", email).Take(&user)
 	if res.Error != nil {
 		log.Errorf("is duplicate email error %v", res.Error)
-		return false, res.Error
+		return true, res.Error
 	}
-	return true, nil
+	return false, nil
 }
 
 // Поиск пользователя по email

@@ -11,26 +11,14 @@ import (
 )
 
 func NewPostgresDB(cfg *config.ConfigDatabase) (*gorm.DB, error) {
-
-	// dsn := fmt.Sprintf(
-	// 	"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
-	// 	"postgres",
-	// 	cfg.User,
-	// 	cfg.Password,
-	// 	cfg.DBName,
-	// 	cfg.Port,
-	// 	cfg.SslMode,
-	// )
 	dsn := fmt.Sprintf(
 		"postgres://%s:%s@%s:%s/%s",
 		cfg.User,
 		cfg.Password,
 		cfg.Host,
-		cfg.Password,
+		cfg.Port,
 		cfg.DBName,
 	)
-
-	log.Info(dsn)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("Error connection database: %v", err)

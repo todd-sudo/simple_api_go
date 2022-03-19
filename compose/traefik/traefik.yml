@@ -24,7 +24,7 @@ certificatesResolvers:
 http:
   routers:
     web-secure-router:
-      rule: "Host(`e-comdata.ru`) || Host(`www.e-comdata.ru`)"
+      rule: "Host(`metrograddiplomtodd.ru`) || Host(`www.metrograddiplomtodd.ru`)"
       entryPoints:
         - web-secure
       middlewares:

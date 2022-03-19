@@ -25,5 +25,5 @@ jobs:
           script: |
             cd simple_api_go/
             git pull
-            sudo ./scripts/build_prod.sh
-            sudo ./script/up_prod.sh
+            ./scripts/build_prod.sh
+            ./script/up_prod.sh

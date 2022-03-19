@@ -42,7 +42,7 @@ http:
     backend:
       loadBalancer:
         servers:
-          - url: http://backend:10000
+          - url: http://backend:8000
 
 providers:
   file:

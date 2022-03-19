@@ -42,7 +42,7 @@ func Run() {
 	services := service.NewService(ctx, *repos)
 	handlers := handler.NewHandler(services)
 
-	srv := server.NewServer("10000", handlers.InitRoutes())
+	srv := server.NewServer("8000", handlers.InitRoutes())
 
 	go func() {
 		if err := srv.Run(); !errors.Is(err, http.ErrServerClosed) {

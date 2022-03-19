@@ -30,8 +30,8 @@ services:
       - ./.env
     environment:
       - PGDATA=/var/lib/postgresql/data/pgdata
-    networks:
-      - goweb
+    # networks:
+    #   - goweb
 
   traefik:
     build:
@@ -57,13 +57,13 @@ services:
       - ./.env
     volumes:
       - pgadmin-data:/var/lib/pgadmin
-    networks:
-      - goweb
+    # networks:
+    #   - goweb
 
 volumes:
   app-db-data:
   pgadmin-data:
   production_traefik:
 
-networks:
-  goweb:
+# networks:
+#   goweb:

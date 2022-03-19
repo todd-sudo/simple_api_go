@@ -1,0 +1,68 @@
+version: "3"
+
+services:
+
+  backend:
+    env_file:
+      - ./.env
+    ports:
+     - "10000:10000"
+    depends_on:
+      - db
+    networks:
+      - goweb
+ 
+    build:
+      context: .
+      dockerfile: ./compose/goweb/Dockerfile
+    volumes:
+      - .:/go/src/app
+
+    command: ["go", "run", "/go/src/app/cmd/web/main.go"]
+
+  db:
+    image: postgres:12
+    volumes:
+      - app-db-data:/var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    env_file:
+      - ./.env
+    environment:
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    networks:
+      - goweb
+
+  traefik:
+    build:
+      context: .
+      dockerfile: ./compose/traefik/Dockerfile
+    image: production_traefik
+    depends_on:
+      - backend
+    volumes:
+      - production_traefik:/etc/traefik/acme:z
+    ports:
+      - "0.0.0.0:80:80"
+      - "0.0.0.0:443:443"
+      # - "0.0.0.0:5555:5555"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    ports:
+      - "5050:5050"
+    depends_on:
+      - db
+    env_file:
+      - ./.env
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    networks:
+      - goweb
+
+volumes:
+  app-db-data:
+  pgadmin-data:
+
+networks:
+  goweb:

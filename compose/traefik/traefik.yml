@@ -6,70 +6,45 @@ entryPoints:
     # http
     address: ":80"
     http:
-      # https://docs.traefik.io/routing/entrypoints/#entrypoint
       redirections:
         entryPoint:
           to: web-secure
 
   web-secure:
-    # https
     address: ":443"
-
-  flower:
-    address: ":5555"
 
 certificatesResolvers:
   letsencrypt:
-    # https://docs.traefik.io/master/https/acme/#lets-encrypt
     acme:
-      email: "say3lesh@gmail.com"
+      email: "todd.develop@gmail.com"
       storage: /etc/traefik/acme/acme.json
-      # https://docs.traefik.io/master/https/acme/#httpchallenge
       httpChallenge:
         entryPoint: web
 
 http:
   routers:
     web-secure-router:
-      rule: "Host(`e-comdata.ru`) || Host(`www.e-comdata.ru`) || Host(`e-comdata.com`) || Host(`www.e-comdata.com`)"
+      rule: "Host(`e-comdata.ru`) || Host(`www.e-comdata.ru`)"
       entryPoints:
         - web-secure
       middlewares:
         - csrf
-      service: django
+      service: backend
       tls:
-        # https://docs.traefik.io/master/routing/routers/#certresolver
-        certResolver: letsencrypt
-
-    flower-secure-router:
-      rule: "Host(`e-comdata.ru`) || Host(`e-comdata.com`)"
-      entryPoints:
-        - flower
-      service: flower
-      tls:
-        # https://docs.traefik.io/master/routing/routers/#certresolver
         certResolver: letsencrypt
 
   middlewares:
     csrf:
-      # https://docs.traefik.io/master/middlewares/headers/#hostsproxyheaders
-      # https://docs.djangoproject.com/en/dev/ref/csrf/#ajax
       headers:
         hostsProxyHeaders: ["X-CSRFToken"]
 
   services:
-    django:
+    backend:
       loadBalancer:
         servers:
-          - url: http://django:5000
-
-    flower:
-      loadBalancer:
-        servers:
-          - url: http://flower:5555
+          - url: http://backend:10000
 
 providers:
-  # https://docs.traefik.io/master/providers/file/
   file:
     filename: /etc/traefik/traefik.yml
     watch: true

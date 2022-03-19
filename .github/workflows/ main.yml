@@ -25,5 +25,6 @@ jobs:
           script: |
             cd simple_api_go/
             git pull
+            ./scripts/down_prod.sh
             ./scripts/build_prod.sh
-            ./script/up_prod.sh
+            ./scripts/up_prod.sh

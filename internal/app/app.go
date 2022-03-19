@@ -4,27 +4,36 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
+	"github.com/todd-sudo/todo/internal/config"
 	"github.com/todd-sudo/todo/internal/handler"
 	"github.com/todd-sudo/todo/internal/repository"
 	"github.com/todd-sudo/todo/pkg/server"
+
+	"os"
 
 	"github.com/todd-sudo/todo/internal/service"
 	log "github.com/todd-sudo/todo/pkg/logger"
 )
 
 func Run() {
-	db, err := repository.NewPostgresDB()
+	cfg := config.ConfigDatabase{
+		Host:     os.Getenv("POSTGRES_HOST"),
+		User:     os.Getenv("POSTGRES_USER"),
+		Password: os.Getenv("POSTGRES_PASSWORD"),
+		Port:     os.Getenv("POSTGRES_PORT"),
+		DBName:   os.Getenv("POSTGRES_DB"),
+		SslMode:  os.Getenv("POSTGRES_SSL_MODE"),
+	}
+
+	db, err := repository.NewPostgresDB(&cfg)
 	if err != nil {
 		log.Error(err)
 	}
 
-	// db.AutoMigrate(&model.Item{}, &model.User{})
-	// log.Info("Migrate Successfully")
 	log.Info("Connect to database successfully!")
 
 	ctx := context.Background()
@@ -33,7 +42,7 @@ func Run() {
 	services := service.NewService(ctx, *repos)
 	handlers := handler.NewHandler(services)
 
-	srv := server.NewServer("8000", handlers.InitRoutes())
+	srv := server.NewServer("10000", handlers.InitRoutes())
 
 	go func() {
 		if err := srv.Run(); !errors.Is(err, http.ErrServerClosed) {
@@ -41,7 +50,7 @@ func Run() {
 		}
 	}()
 
-	log.Info("Server started on http://127.0.0.1:8000")
+	log.Info("Server started on http://127.0.0.1:10000")
 
 	// Graceful Shutdown
 	quit := make(chan os.Signal, 1)

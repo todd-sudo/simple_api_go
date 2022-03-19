@@ -1,2 +1,2 @@
 #!/bin/bash
-sudo docker-compose -f prod.yml down
+docker-compose -f prod.yml down

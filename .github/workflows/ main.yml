@@ -5,7 +5,7 @@ on:
     branches:
       - master
 
-env:
+# env:
   # REGISTRY: "registry.digitalocean.com/sandbox-registry"
   # IMAGE_NAME: "pocket-bot"
   # CONTAINER_NAME: "pocket"

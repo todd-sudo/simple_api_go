@@ -1,7 +1,7 @@
 ---
 
 app:
-  port: 10000
+  port: 8000
 
 database: 
   postgres_host: #db

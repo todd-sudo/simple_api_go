@@ -22,16 +22,6 @@ import (
 func Run() {
 
 	cfg := config.GetConfig()
-
-	// cfgDatabase := config.ConfigDatabase{
-	// 	Host:     os.Getenv("POSTGRES_HOST"),
-	// 	User:     os.Getenv("POSTGRES_USER"),
-	// 	Password: os.Getenv("POSTGRES_PASSWORD"),
-	// 	Port:     os.Getenv("POSTGRES_PORT"),
-	// 	DBName:   os.Getenv("POSTGRES_DB"),
-	// 	SslMode:  os.Getenv("POSTGRES_SSL_MODE"),
-	// }
-
 	db, err := repository.NewPostgresDB(cfg)
 	if err != nil {
 		log.Error(err)

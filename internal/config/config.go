@@ -1,38 +1,47 @@
 package config
 
-import (
-	"sync"
-
-	"github.com/ilyakaznacheev/cleanenv"
-	"github.com/todd-sudo/todo/pkg/logger"
-)
+import "os"
 
 type Config struct {
 	Database struct {
-		Host     string `yaml:"postgres_host" env:"POSTGRES_HOST"`
-		User     string `yaml:"postgres_user" env:"POSTGRES_USER"`
-		Password string `yaml:"postgres_password" env:"POSTGRES_PASSWORD"`
-		DBName   string `yaml:"postgres_db" env:"POSTGRES_DB"`
-		SslMode  string `yaml:"postgres_ssl" env:"POSTGRES_SSL_MODE"`
-		Port     string `yaml:"postgres_db_port" env:"POSTGRES_PORT"`
+		Host     string
+		User     string
+		Password string
+		DBName   string
+		SslMode  string
+		Port     string
 	}
 	App struct {
-		Port string `yaml:"port"` // env-required:"true"
+		Port    string
+		GinMode string
 	}
 }
 
-var instance *Config
-var once sync.Once
-
+// Конфигурация приложения
 func GetConfig() *Config {
-	once.Do(func() {
-		logger.Info("read application configuration")
-		instance = &Config{}
-		if err := cleanenv.ReadConfig("config.yml", instance); err != nil {
-			help, _ := cleanenv.GetDescription(instance, nil)
-			logger.Info(help)
-			logger.Fatal(err)
-		}
-	})
-	return instance
+
+	return &Config{
+		Database: struct {
+			Host     string
+			User     string
+			Password string
+			DBName   string
+			SslMode  string
+			Port     string
+		}{
+			Host:     os.Getenv("POSTGRES_HOST"),
+			User:     os.Getenv("POSTGRES_USER"),
+			Password: os.Getenv("POSTGRES_PASSWORD"),
+			DBName:   os.Getenv("POSTGRES_DB"),
+			SslMode:  os.Getenv("POSTGRES_SSL_MODE"),
+			Port:     os.Getenv("POSTGRES_PORT"),
+		},
+		App: struct {
+			Port    string
+			GinMode string
+		}{
+			Port:    os.Getenv("APP_PORT"),
+			GinMode: os.Getenv("GIN_MODE"),
+		},
+	}
 }

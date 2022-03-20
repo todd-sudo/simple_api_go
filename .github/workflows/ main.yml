@@ -5,11 +5,6 @@ on:
     branches:
       - master
 
-# env:
-  # REGISTRY: "registry.digitalocean.com/sandbox-registry"
-  # IMAGE_NAME: "pocket-bot"
-  # CONTAINER_NAME: "pocket"
-
 jobs:
 
   deploy:

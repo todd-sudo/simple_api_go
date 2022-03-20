@@ -20,16 +20,19 @@ import (
 )
 
 func Run() {
-	cfg := config.ConfigDatabase{
-		Host:     os.Getenv("POSTGRES_HOST"),
-		User:     os.Getenv("POSTGRES_USER"),
-		Password: os.Getenv("POSTGRES_PASSWORD"),
-		Port:     os.Getenv("POSTGRES_PORT"),
-		DBName:   os.Getenv("POSTGRES_DB"),
-		SslMode:  os.Getenv("POSTGRES_SSL_MODE"),
-	}
 
-	db, err := repository.NewPostgresDB(&cfg)
+	cfg := config.GetConfig()
+
+	// cfgDatabase := config.ConfigDatabase{
+	// 	Host:     os.Getenv("POSTGRES_HOST"),
+	// 	User:     os.Getenv("POSTGRES_USER"),
+	// 	Password: os.Getenv("POSTGRES_PASSWORD"),
+	// 	Port:     os.Getenv("POSTGRES_PORT"),
+	// 	DBName:   os.Getenv("POSTGRES_DB"),
+	// 	SslMode:  os.Getenv("POSTGRES_SSL_MODE"),
+	// }
+
+	db, err := repository.NewPostgresDB(cfg)
 	if err != nil {
 		log.Error(err)
 	}
@@ -42,7 +45,7 @@ func Run() {
 	services := service.NewService(ctx, *repos)
 	handlers := handler.NewHandler(services)
 
-	srv := server.NewServer("8000", handlers.InitRoutes())
+	srv := server.NewServer(cfg.App.Port, handlers.InitRoutes())
 
 	go func() {
 		if err := srv.Run(); !errors.Is(err, http.ErrServerClosed) {
@@ -50,7 +53,7 @@ func Run() {
 		}
 	}()
 
-	log.Info("Server started on http://127.0.0.1:10000")
+	log.Info("Server started on http://127.0.0.1:" + cfg.App.Port)
 
 	// Graceful Shutdown
 	quit := make(chan os.Signal, 1)
